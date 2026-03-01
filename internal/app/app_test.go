@@ -278,20 +278,32 @@ func TestModel_StatusMsgClearsOnKeyPress(t *testing.T) {
 }
 
 func TestDefaultHelpBindings(t *testing.T) {
-	bindings := DefaultHelpBindings()
-	if len(bindings) == 0 {
-		t.Error("expected non-empty help bindings")
+	// Test all pane contexts return bindings including Tab.
+	contexts := []struct {
+		focus   PaneID
+		editing bool
+	}{
+		{PaneExplorer, false},
+		{PaneRequestBuilder, false},
+		{PaneRequestBuilder, true},
+		{PaneResponseViewer, false},
 	}
-
-	found := false
-	for _, b := range bindings {
-		if b.Key == "Tab" {
-			found = true
-			break
+	for _, ctx := range contexts {
+		bindings := DefaultHelpBindings(ctx.focus, ctx.editing)
+		if len(bindings) == 0 {
+			t.Errorf("expected non-empty help bindings for focus=%d editing=%v", ctx.focus, ctx.editing)
 		}
-	}
-	if !found {
-		t.Error("expected Tab in help bindings")
+
+		found := false
+		for _, b := range bindings {
+			if b.Key == "Tab" {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("expected Tab in help bindings for focus=%d editing=%v", ctx.focus, ctx.editing)
+		}
 	}
 }
 

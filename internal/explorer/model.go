@@ -9,12 +9,13 @@ import (
 
 // Model is the Bubble Tea model for the explorer pane.
 type Model struct {
-	roots   []*TreeNode
-	visible []*TreeNode
-	cursor  int
-	focused bool
-	width   int
-	height  int
+	roots    []*TreeNode
+	visible  []*TreeNode
+	warnings []string
+	cursor   int
+	focused  bool
+	width    int
+	height   int
 }
 
 // New creates a new explorer model from a proto registry.
@@ -34,6 +35,11 @@ func (m *Model) SetRegistry(reg *proto.Registry) {
 // SetFocused sets whether this pane has keyboard focus.
 func (m *Model) SetFocused(focused bool) {
 	m.focused = focused
+}
+
+// SetWarnings sets the list of proto parse warnings/errors to display.
+func (m *Model) SetWarnings(w []string) {
+	m.warnings = w
 }
 
 // SetSize sets the pane dimensions.

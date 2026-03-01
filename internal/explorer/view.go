@@ -13,7 +13,11 @@ import (
 // View implements tea.Model.
 func (m Model) View() tea.View {
 	if len(m.visible) == 0 {
-		content := ui.EmptyState("No services loaded", m.width-2, m.height-2)
+		if len(m.warnings) > 0 {
+			content := m.renderWarnings()
+			return tea.NewView(m.applyBorder(content))
+		}
+		content := ui.EmptyState("No services loaded", m.width-4, m.height-4)
 		return tea.NewView(m.applyBorder(content))
 	}
 
@@ -97,6 +101,43 @@ func (m Model) renderNode(node *TreeNode, selected bool) string {
 	}
 
 	return lipgloss.NewStyle().Foreground(ui.ColorText).Render(line)
+}
+
+func (m Model) renderWarnings() string {
+	titleStyle := lipgloss.NewStyle().Bold(true).Foreground(ui.ColorWarning)
+	errStyle := lipgloss.NewStyle().Foreground(ui.ColorError)
+
+	var lines []string
+	lines = append(lines, titleStyle.Render("Failed to load services"))
+	lines = append(lines, "")
+	for _, w := range m.warnings {
+		maxLen := m.width - 8
+		if maxLen < 20 {
+			maxLen = 20
+		}
+		display := w
+		if len(display) > maxLen {
+			display = display[:maxLen-3] + "..."
+		}
+		lines = append(lines, errStyle.Render("  "+display))
+	}
+	lines = append(lines, "")
+	lines = append(lines, ui.DimmedStyle.Render("Ctrl+R to reload | Ctrl+W for details"))
+
+	content := strings.Join(lines, "\n")
+	innerW := m.width - 4
+	innerH := m.height - 4
+	if innerW < 1 {
+		innerW = 1
+	}
+	if innerH < 1 {
+		innerH = 1
+	}
+	return lipgloss.NewStyle().
+		Width(innerW).
+		Height(innerH).
+		Align(lipgloss.Center, lipgloss.Center).
+		Render(content)
 }
 
 func (m Model) applyBorder(content string) string {

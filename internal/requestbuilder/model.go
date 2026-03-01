@@ -17,6 +17,7 @@ type Model struct {
 	flatFields []*FormField // flattened visible fields for navigation
 	focusIdx   int
 	inMetadata bool       // true if focus is in metadata section
+	editing    bool       // true when in edit/insert mode for text fields
 	enumPopup  *EnumPopup // non-nil when enum overlay is open
 	focused    bool
 	width      int
@@ -45,6 +46,7 @@ func (m *Model) SetMethod(md protoreflect.MethodDescriptor) {
 	m.fields = Generate(md.Input())
 	m.focusIdx = 0
 	m.inMetadata = false
+	m.editing = false
 	m.enumPopup = nil
 	m.flatFields = flattenFormFields(m.fields)
 }
@@ -52,6 +54,11 @@ func (m *Model) SetMethod(md protoreflect.MethodDescriptor) {
 // Method returns the current method descriptor.
 func (m *Model) Method() protoreflect.MethodDescriptor {
 	return m.method
+}
+
+// Editing returns true when the request builder is in edit/insert mode.
+func (m *Model) Editing() bool {
+	return m.editing
 }
 
 // Fields returns the form fields.
@@ -193,8 +200,43 @@ func (m Model) handleEnumPopup(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, nil
 }
 
+// isEditableField returns true if the focused field supports text editing.
+func (m Model) isEditableField() bool {
+	if len(m.flatFields) == 0 || m.focusIdx >= len(m.flatFields) {
+		return false
+	}
+	f := m.flatFields[m.focusIdx]
+	switch f.Info.Kind {
+	case proto.FieldKindScalar, proto.FieldKindTimestamp, proto.FieldKindDuration,
+		proto.FieldKindStruct, proto.FieldKindWrapper:
+		return f.Widget != nil
+	}
+	return false
+}
+
+// isPrintable returns true if the key event represents a printable character.
+func isPrintable(msg tea.KeyPressMsg) bool {
+	return msg.Text != "" && msg.Code >= 32
+}
+
 func (m Model) handleKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	s := msg.String()
+
+	// Edit mode: forward everything to the widget except Esc and Ctrl+Enter.
+	if m.editing {
+		switch s {
+		case "escape", "esc":
+			m.editing = false
+			return m, nil
+		case "ctrl+enter":
+			m.editing = false
+			return m.handleSubmit()
+		default:
+			return m.updateFocusedWidget(msg)
+		}
+	}
+
+	// Normal mode below.
 
 	// Toggle metadata section focus.
 	if m.inMetadata {
@@ -231,6 +273,11 @@ func (m Model) handleKey(msg tea.KeyPressMsg) (tea.Model, tea.Cmd) {
 	case "ctrl+enter":
 		return m.handleSubmit()
 	default:
+		// Auto-enter edit mode on printable character when on an editable field.
+		if isPrintable(msg) && m.isEditableField() {
+			m.editing = true
+			return m.updateFocusedWidget(msg)
+		}
 		return m.updateFocusedWidget(msg)
 	}
 
@@ -274,6 +321,11 @@ func (m Model) handleEnter() (tea.Model, tea.Cmd) {
 		// For oneof variant children, activate this variant.
 		if f.OneofGroup != "" {
 			m.activateOneofVariant(f)
+			return m, nil
+		}
+		// Enter edit mode for editable text fields.
+		if f.Widget != nil {
+			m.editing = true
 		}
 	}
 

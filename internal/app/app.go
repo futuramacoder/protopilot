@@ -288,6 +288,11 @@ func (m Model) handleProtoLoaded(msg ProtoLoadedMsg) (tea.Model, tea.Cmd) {
 
 	if msg.Err != nil {
 		m.warnings = append(m.warnings, msg.Err.Error())
+	}
+
+	m.explorer.SetWarnings(m.warnings)
+
+	if msg.Err != nil {
 		return m, nil
 	}
 
@@ -442,7 +447,7 @@ func (m Model) View() tea.View {
 	if m.statusMsg != "" {
 		warningStrs = append(warningStrs, m.statusMsg)
 	}
-	helpView := m.helpBar.View(DefaultHelpBindings(), warningStrs)
+	helpView := m.helpBar.View(DefaultHelpBindings(m.focus, m.requestBuilder.Editing()), warningStrs)
 
 	full := lipgloss.JoinVertical(lipgloss.Left,
 		mainContent,

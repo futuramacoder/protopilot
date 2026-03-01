@@ -13,9 +13,9 @@ func (m Model) View() tea.View {
 
 	switch {
 	case m.loading:
-		content = ui.EmptyState("Sending request...", m.width-2, m.height-3)
+		content = ui.EmptyState("Sending request...", m.width-4, m.height-4)
 	case !m.hasResp:
-		content = ui.EmptyState("Send a request to see the response", m.width-2, m.height-3)
+		content = ui.EmptyState("Send a request to see the response", m.width-4, m.height-4)
 	default:
 		content = m.viewport.View()
 	}

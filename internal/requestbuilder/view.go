@@ -14,7 +14,7 @@ import (
 // View implements tea.Model.
 func (m Model) View() tea.View {
 	if m.method == nil {
-		content := ui.EmptyState("Select a method from the explorer to begin", m.width-2, m.height-2)
+		content := ui.EmptyState("Select a method from the explorer to begin", m.width-4, m.height-4)
 		return tea.NewView(m.applyBorder(content))
 	}
 
@@ -216,6 +216,17 @@ func (m Model) applyBorder(content string) string {
 
 	titleStyle := lipgloss.NewStyle().Bold(true).Foreground(ui.ColorSecondary)
 	title := titleStyle.Render(" Request Builder ")
+
+	if m.focused && m.method != nil {
+		modeStyle := lipgloss.NewStyle().Bold(true)
+		if m.editing {
+			modeStyle = modeStyle.Foreground(ui.ColorWarning)
+			title += " " + modeStyle.Render("[INSERT]")
+		} else {
+			modeStyle = modeStyle.Foreground(ui.ColorDimmed)
+			title += " " + modeStyle.Render("[NORMAL]")
+		}
+	}
 
 	return border.
 		Width(m.width - 2).

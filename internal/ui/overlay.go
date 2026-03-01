@@ -41,12 +41,19 @@ func HelpOverlay(width, height int) string {
 	lines = append(lines, fmtBinding(keyStyle, descStyle, "G", "Jump to bottom"))
 	lines = append(lines, "")
 
-	lines = append(lines, sectionStyle.Render("Request Builder"))
+	lines = append(lines, sectionStyle.Render("Request Builder (Normal Mode)"))
 	lines = append(lines, fmtBinding(keyStyle, descStyle, "j / Down", "Next field"))
 	lines = append(lines, fmtBinding(keyStyle, descStyle, "k / Up", "Previous field"))
-	lines = append(lines, fmtBinding(keyStyle, descStyle, "Enter", "Toggle section / enum popup / bool"))
+	lines = append(lines, fmtBinding(keyStyle, descStyle, "Enter", "Edit field / toggle section / enum / bool"))
 	lines = append(lines, fmtBinding(keyStyle, descStyle, "a", "Add repeated/map entry"))
 	lines = append(lines, fmtBinding(keyStyle, descStyle, "d", "Remove entry"))
+	lines = append(lines, fmtBinding(keyStyle, descStyle, "any char", "Start typing to enter edit mode"))
+	lines = append(lines, "")
+
+	lines = append(lines, sectionStyle.Render("Request Builder (Edit Mode)"))
+	lines = append(lines, fmtBinding(keyStyle, descStyle, "Type", "Characters go into the field"))
+	lines = append(lines, fmtBinding(keyStyle, descStyle, "Esc", "Exit edit mode (back to normal)"))
+	lines = append(lines, fmtBinding(keyStyle, descStyle, "Ctrl+Enter", "Send request"))
 	lines = append(lines, "")
 
 	lines = append(lines, sectionStyle.Render("Response Viewer"))
