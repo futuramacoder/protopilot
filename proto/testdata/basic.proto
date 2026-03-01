@@ -1,0 +1,93 @@
+syntax = "proto3";
+package testdata;
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/duration.proto";
+import "google/protobuf/struct.proto";
+import "google/protobuf/wrappers.proto";
+import "google/protobuf/field_mask.proto";
+
+service UserService {
+  rpc GetUser(GetUserRequest) returns (GetUserResponse);
+  rpc CreateUser(CreateUserRequest) returns (CreateUserResponse);
+  rpc ListUsers(ListUsersRequest) returns (stream ListUsersResponse);
+}
+
+enum UserRole {
+  USER_ROLE_UNSPECIFIED = 0;
+  USER_ROLE_ADMIN = 1;
+  USER_ROLE_MEMBER = 2;
+  USER_ROLE_GUEST = 3;
+}
+
+message Address {
+  string street = 1;
+  string city = 2;
+  string state = 3;
+  string zip_code = 4;
+  string country = 5;
+}
+
+message User {
+  string id = 1;
+  string name = 2;
+  string email = 3;
+  UserRole role = 4;
+  Address address = 5;
+  repeated string tags = 6;
+  map<string, string> labels = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Duration session_timeout = 9;
+  google.protobuf.Struct metadata = 10;
+  google.protobuf.StringValue nickname = 11;
+}
+
+message GetUserRequest {
+  string user_id = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message CreateUserRequest {
+  string name = 1;
+  string email = 2;
+  UserRole role = 3;
+  Address address = 4;
+  repeated string tags = 5;
+  map<string, string> labels = 6;
+  google.protobuf.Timestamp created_at = 7;
+  google.protobuf.Duration timeout = 8;
+  google.protobuf.Struct metadata = 9;
+  google.protobuf.StringValue nickname = 10;
+
+  oneof contact {
+    string phone = 11;
+    string slack_handle = 12;
+  }
+
+  int32 age = 13;
+  int64 score = 14;
+  uint32 level = 15;
+  uint64 experience = 16;
+  float rating = 17;
+  double balance = 18;
+  bool active = 19;
+  bytes avatar = 20;
+  google.protobuf.FieldMask update_mask = 21;
+}
+
+message CreateUserResponse {
+  User user = 1;
+}
+
+message ListUsersRequest {
+  int32 page_size = 1;
+  string page_token = 2;
+}
+
+message ListUsersResponse {
+  repeated User users = 1;
+  string next_page_token = 2;
+}

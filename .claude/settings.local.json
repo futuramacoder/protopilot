@@ -1,0 +1,22 @@
+{
+  "permissions": {
+    "allow": [
+      "WebSearch",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:blog.salrashid.dev)",
+      "Bash(python3:*)",
+      "Bash(go mod:*)",
+      "Bash(go build:*)",
+      "Bash(go version:*)",
+      "Bash(go env:*)",
+      "Bash(go vet:*)",
+      "Bash(GOFLAGS=-tags=goexperiment.swissmap go build:*)",
+      "Bash(sudo sed:*)",
+      "Bash(cp:*)",
+      "Bash(go:*)",
+      "Bash(echo:*)",
+      "Bash(make build:*)",
+      "Bash(./bin/protopilot:*)"
+    ]
+  }
+}
